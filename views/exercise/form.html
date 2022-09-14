@@ -1,0 +1,41 @@
+{{ define "exercise/form.html" }}
+    {{ template "layouts/header.html" .}}
+
+<div class="flex min-h-full items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        
+    <div class="p-4 w-full max-w-sm bg-white rounded-lg border border-gray-200 shadow-md sm:p-6 md:p-8 dark:bg-gray-800 dark:border-gray-700">
+
+        <form class="space-y-6" {{ if not .item }} action="/exercise" {{ end }} method="POST">
+        <div class="-space-y-px rounded-md shadow-sm">
+            <div class="mb-6">
+                <label for="category" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-400">Select Category</label>
+                <select id="category" name="category" value="{{ .item.Category.Name }}" {{ if .item }} disabled {{ end }} class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                    {{ range .categories }}
+                        <option value="{{ .ID }}" {{ if eq $.item.CategoryID .ID }} selected {{ end }}>{{ .Name }} </option>
+                    {{ end }}
+                </select>
+            </div>
+
+            {{ if .item.SecondaryCategoryID }}
+            <div class="mb-6">
+                <label for="secondary_category" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-400">Select Secondary Category</label>
+                <select id="secondary_category" name="secondary_category" value="{{ .item.Category.Name }}" disabled class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                    {{ range .secondaryCategories }}
+                            <option value="{{ .ID }}" {{ if eq $.item.SecondaryCategoryID .ID }} selected {{ end }}>{{ .Name }}</option>
+                        {{ end }}
+                    </select>
+                </div>
+            {{ end }}
+        </div>
+
+        <div>
+            <button type="submit" class="group relative flex w-full justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+            Submit
+            </button>
+        </div>
+        </form>
+    </div>
+</div>
+
+    {{ template "layouts/footer.html" .}}
+{{ end }}
