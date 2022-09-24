@@ -71,16 +71,17 @@ func store(c *fiber.Ctx) error {
 	
 	db.DB.Create(&item)
 
+	results := []models.Result{}
 	for i := 0; i < len(criterias); i++ {
 		criteria, _ := strconv.Atoi(criterias[i])
 		value, _ := strconv.Atoi(values[i])
-		result := models.Result{
+		results = append(results, models.Result{
 			Value: uint(value),
 			CriteriaID: uint(criteria),
 			ExerciseID: item.ID,
-		}
-		db.DB.Create(&result)
+		})
 	}
+	db.DB.Create(&results)
 
 	return c.Redirect("/exercise")
 }
@@ -88,14 +89,20 @@ func store(c *fiber.Ctx) error {
 func edit(c *fiber.Ctx) error {
 	id := c.Params("id")
 
+	var settings []models.Setting
+	querySettingChannel := make(chan bool)
+	go func() {
+		db.DB.Find(&settings)
+		querySettingChannel <- true
+	}()
+
 	var item models.Exercise
 	exist := db.DB.Preload("Results").First(&item, id)
 	if exist.RowsAffected == 0 {
 		return c.Redirect( "/setting")
 	}
 
-	var settings []models.Setting
-	db.DB.Find(&settings)
+	<- querySettingChannel
 
 	categories := []models.Setting{}
 	secondaryCategories := []models.Setting{}
@@ -123,6 +130,12 @@ func edit(c *fiber.Ctx) error {
 func update(c *fiber.Ctx) error {
 	id := c.Params("id")
 
+	deleteResultChannel := make(chan bool)
+	go func() {
+		db.DB.Where("exercise_id = ?", id).Delete(&models.Result{})
+		deleteResultChannel <- true
+	}()
+
 	var item models.Exercise
 	exist := db.DB.First(&item, id)
 	if exist.RowsAffected == 0 {
@@ -144,19 +157,18 @@ func update(c *fiber.Ctx) error {
 	}
 
 	db.DB.Save(&item)
-
-	db.DB.Where("exercise_id = ?", item.ID).Delete(&models.Result{})
 	
+	results := []models.Result{}
 	for i := 0; i < len(criterias); i++ {
 		criteria, _ := strconv.Atoi(criterias[i])
 		value, _ := strconv.Atoi(values[i])
-		result := models.Result{
+		results = append(results, models.Result{
 			Value: uint(value),
 			CriteriaID: uint(criteria),
 			ExerciseID: item.ID,
-		}
-		db.DB.Create(&result)
+		})
 	}
+	db.DB.Create(&results)
 
 	return c.Redirect("/exercise")
 }
