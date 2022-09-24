@@ -24,13 +24,18 @@ func index(c *fiber.Ctx) error {
 }
 
 func create(c *fiber.Ctx) error {
-	var settings []models.Setting
-	db.DB.Find(&settings)
+	settings, _ := db.DB.Model(&models.Setting{}).Rows()
+	defer settings.Close()
 
 	categories := []models.Setting{}
 	secondaryCategories := []models.Setting{}
 	criterias := []models.Setting{}
-	for _, setting := range settings {
+
+	for settings.Next() {
+		
+		var setting models.Setting
+		db.DB.ScanRows(settings, &setting)
+
 		if setting.Type == "CATEGORY" {
 			categories = append(categories, setting)
 		} else if setting.Type == "SECONDARY_CATEGORY" {
@@ -89,10 +94,28 @@ func store(c *fiber.Ctx) error {
 func edit(c *fiber.Ctx) error {
 	id := c.Params("id")
 
-	var settings []models.Setting
+	categories := []models.Setting{}
+	secondaryCategories := []models.Setting{}
+	criterias := []models.Setting{}
 	querySettingChannel := make(chan bool)
+
 	go func() {
-		db.DB.Find(&settings)
+		settings, _ := db.DB.Model(&models.Setting{}).Rows()
+		defer settings.Close()
+
+		for settings.Next() {
+			
+			var setting models.Setting
+			db.DB.ScanRows(settings, &setting)
+
+			if setting.Type == "CATEGORY" {
+				categories = append(categories, setting)
+			} else if setting.Type == "SECONDARY_CATEGORY" {
+				secondaryCategories = append(secondaryCategories, setting)
+			} else if setting.Type == "CRITERIA" {
+				criterias = append(criterias, setting)
+			}
+		}
 		querySettingChannel <- true
 	}()
 
@@ -103,19 +126,6 @@ func edit(c *fiber.Ctx) error {
 	}
 
 	<- querySettingChannel
-
-	categories := []models.Setting{}
-	secondaryCategories := []models.Setting{}
-	criterias := []models.Setting{}
-	for _, setting := range settings {
-		if setting.Type == "CATEGORY" {
-			categories = append(categories, setting)
-		} else if setting.Type == "SECONDARY_CATEGORY" {
-			secondaryCategories = append(secondaryCategories, setting)
-		} else if setting.Type == "CRITERIA" {
-			criterias = append(criterias, setting)
-		}
-	}
 
 	return c.Render("exercise/form.html", fiber.Map{
 		"title": "Setting",
