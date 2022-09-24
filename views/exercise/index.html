@@ -23,6 +23,9 @@
                     <th scope="col" class="py-3 px-6">
                         Secondary Category
                     </th>
+                    <th scope="col" class="py-3 px-6">
+                        Result
+                    </th>
                     <th scope="col" class="py-3 px-1">
                         Action
                     </th>
@@ -36,6 +39,11 @@
                         </th>
                         <td class="py-4 px-6">
                             {{ .SecondaryCategory.Name }}
+                        </td>
+                        <td class="py-4 px-6">
+                            {{ range .Results }}
+                                {{ .Criteria.Name }}: {{ .Value }}
+                            {{ end }}
                         </td>
                         <td class="py-4 px-1">
                             <a href="exercise/edit/{{ .ID }}">

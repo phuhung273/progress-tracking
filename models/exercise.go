@@ -2,8 +2,6 @@ package models
 
 import (
 	"time"
-
-	"gorm.io/datatypes"
 )
 
 type Exercise struct {
@@ -14,6 +12,6 @@ type Exercise struct {
 	SecondaryCategory   Setting `gorm:"foreignKey:SecondaryCategoryID"`
 	UserID              uint
 	User                User
+	Results []Result
 	CreatedAt time.Time
-	Result datatypes.JSON
 }

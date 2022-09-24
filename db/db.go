@@ -29,4 +29,5 @@ func Init() {
 	DB.AutoMigrate(&models.User{})
 	DB.AutoMigrate(&models.Exercise{})
 	DB.AutoMigrate(&models.Setting{})
+	DB.AutoMigrate(&models.Result{})
 }
