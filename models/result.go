@@ -6,5 +6,5 @@ type Result struct {
 	CriteriaID uint
 	Criteria   Setting `gorm:"foreignKey:CriteriaID"`
 	ExerciseID uint
-	Exercise   Exercise `gorm:"foreignKey:ExerciseID"`
+	Exercise   Exercise
 }
