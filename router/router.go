@@ -26,7 +26,7 @@ func Route() {
 }
 func Init() {
 	
-	engine := html.New("./views", ".html")
+	engine := html.New("views", ".html")
 	engine.Reload(true)
 
 	Router = fiber.New(fiber.Config{
