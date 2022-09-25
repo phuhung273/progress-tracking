@@ -1,7 +1,7 @@
 {{ define "home.html" }}
   {{ template "layouts/header.html" .}}
 
-  <div>
+  <div class="max-w-2xl mx-auto">
     <canvas id="myChart"></canvas>
   </div>
 
@@ -16,7 +16,7 @@
             borderColor: 'rgb(255, 99, 132)',
             data: {{ .values }},
           }
-      ]
+        ]
       };
     
       const config = {

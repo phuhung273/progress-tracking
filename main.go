@@ -1,6 +1,7 @@
 package main
 
 import (
+	"os"
 	"phuhung273/progress-tracking/db"
 	"phuhung273/progress-tracking/router"
 
@@ -18,6 +19,8 @@ func main() {
 	router.Init()
 
 	router.Route()
-	router.Router.Listen(":8080")
+
+	port := os.Getenv("PORT")
+	router.Router.Listen(":" + port)
 
 }
