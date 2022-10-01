@@ -5,7 +5,7 @@ import (
 )
 
 type Exercise struct {
-	ID                  uint `gorm:"primarykey"`
+	ID                  uint `json:"id" gorm:"primarykey"`
 	CategoryID          uint
 	Category            Setting `gorm:"foreignKey:CategoryID"`
 	SecondaryCategoryID *uint

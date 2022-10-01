@@ -1,6 +1,7 @@
 package exercise
 
 import (
+	"fmt"
 	"phuhung273/progress-tracking/db"
 	"phuhung273/progress-tracking/middleware"
 	"phuhung273/progress-tracking/models"
@@ -22,9 +23,9 @@ func index(c *fiber.Ctx) error {
 	// 	"title": "Exercise",
 	// 	"items": items,
 	// })
-	return c.JSON(fiber.Map{
-		"data": items,
-	})
+	c.Set("Access-Control-Expose-Headers", "X-Total-Count")
+	c.Set("X-Total-Count", fmt.Sprint(len(items)))
+	return c.JSON(items)
 }
 
 func create(c *fiber.Ctx) error {

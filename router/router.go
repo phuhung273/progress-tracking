@@ -7,6 +7,7 @@ import (
 	"phuhung273/progress-tracking/controllers/user"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 )
 
 var Router *fiber.App
@@ -29,6 +30,8 @@ func Init() {
 	Router = fiber.New(fiber.Config{
 		// Views: engine,
 	})
+
+	Router.Use(cors.New())
 
 	// middleware.SessionStore = session.New()
 }
