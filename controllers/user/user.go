@@ -1,19 +1,22 @@
 package user
 
 import (
+	"os"
 	"phuhung273/progress-tracking/db"
-	"phuhung273/progress-tracking/middleware"
 	"phuhung273/progress-tracking/models"
+	"strconv"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt/v4"
 	"golang.org/x/crypto/bcrypt"
 )
 
-func signUpView(c *fiber.Ctx) error {
-	return c.Render("signup.html", fiber.Map{
-		"title": "Sign Up",
-	})
-}
+// func signUpView(c *fiber.Ctx) error {
+// 	return c.Render("signup.html", fiber.Map{
+// 		"title": "Sign Up",
+// 	})
+// }
 
 func signUp(c *fiber.Ctx) error {
 	username := c.FormValue("email")
@@ -33,54 +36,81 @@ func signUp(c *fiber.Ctx) error {
 	return c.Redirect("login")
 }
 
-func loginView(c *fiber.Ctx) error {
-	return c.Render("login.html", fiber.Map{
-		"title": "Login",
-	})
+// func loginView(c *fiber.Ctx) error {
+// 	return c.Render("login.html", fiber.Map{
+// 		"title": "Login",
+// 	})
+// }
+type LoginRequest struct {
+    Username string `json:"username" form:"username"`
+    Password string `json:"password" form:"password"`
 }
 
 func login(c *fiber.Ctx) error {
-	username := c.FormValue("email")
-	password := c.FormValue("password")
+	loginRequest := new(LoginRequest)
+
+	if err := c.BodyParser(loginRequest); err != nil {
+		return c.Status(401).JSON(fiber.Map{
+			"message": err,
+		})
+	}
 
 	var user models.User
-	exist := db.DB.First(&user, "username = ?", username)
+	exist := db.DB.First(&user, "username = ?", loginRequest.Username)
 	if exist.RowsAffected == 0 {
-		return c.Render("login.html", fiber.Map{
-			"title": "Login",
-			"error": "Username not existed",
+		// return c.Render("login.html", fiber.Map{
+		// 	"title": "Login",
+		// 	"error": "Username not existed",
+		// })
+		return c.Status(401).JSON(fiber.Map{
+			"message": "You are not registered",
 		})
 	}
 
-	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
+	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(loginRequest.Password))
 	if err != nil {
-		return c.Render("login.html", fiber.Map{
-			"title": "Login",
-			"error": "Invalid username or password",
+		// return c.Render("login.html", fiber.Map{
+		// 	"title": "Login",
+		// 	"error": "Invalid username or password",
+		// })
+		return c.Status(401).JSON(fiber.Map{
+			"message": "Invalid username or password",
 		})
 	}
 
-	sess, _ := middleware.SessionStore.Get(c)
-	sess.Set("user_id", user.ID)
-	sess.Save()
+	// sess, _ := middleware.SessionStore.Get(c)
+	// sess.Set("user_id", user.ID)
+	// sess.Save()
+
+	exp, _ := strconv.Atoi(os.Getenv("JWT_EXP"))
 	
-	return c.Redirect("/dashboard")
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"user_id": user.ID,
+		"exp": time.Now().Add(time.Hour * time.Duration(exp)).Unix(),
+	})
+	
+	tokenString, _ := token.SignedString([]byte(os.Getenv("JWT_SECRET")))
+	
+	return c.JSON(fiber.Map{
+		"user_id": user.ID,
+		"access_token": tokenString,
+	})
 }
 
-func signout(c *fiber.Ctx) error {
-	sess, _ := middleware.SessionStore.Get(c)
-	sess.Delete("user_id")
-	sess.Save()
+// func signout(c *fiber.Ctx) error {
+// 	// sess, _ := middleware.SessionStore.Get(c)
+// 	// sess.Delete("user_id")
+// 	// sess.Save()
 	
-	return c.Redirect("login")
-}
+// 	return c.Redirect("login")
+// }
 
 func Routing(router *fiber.App) {
 	router.Route("/auth", func(router fiber.Router) {
-		router.Get("/signup", signUpView)
+		// router.Get("/signup", signUpView)
 		router.Post("/signup", signUp)
-		router.Get("/login", loginView)
+		// router.Get("/login", loginView)
 		router.Post("/login", login)
-		router.Get("/logout", middleware.Auth, signout)
+		// router.Get("/logout", middleware.Auth, signout)
 	})
 }
