@@ -40,7 +40,7 @@ func Auth(c *fiber.Ctx) error {
 
 	
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		c.Locals("user_id", int(claims["user_id"].(float64)))
+		c.Locals("user_id", uint(claims["user_id"].(float64)))
 	} else {
 		return c.Status(401).JSON(fiber.Map{
 			"message": "Invalid token",

@@ -1,7 +1,7 @@
 package models
 
 type Result struct {
-	ID         uint `gorm:"primarykey"`
+	ID         uint `json:"id" gorm:"primarykey"`
 	Value      uint
 	CriteriaID uint
 	Criteria   Setting `gorm:"foreignKey:CriteriaID"`

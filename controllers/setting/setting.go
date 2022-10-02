@@ -10,15 +10,28 @@ import (
 )
 
 func index(c *fiber.Ctx) error {
+	typeName := c.Query("Type")
+
 	var count int64
 	countQueryChannel := make(chan bool)
 	go func() {
-		db.DB.Model(&models.Setting{}).Count(&count)
+		query := db.DB.Model(&models.Setting{})
+		if typeName != "" {
+			query.Where("type = ?", typeName)
+		}
+
+		query.Count(&count)
 		countQueryChannel <- true
 	}()
 
 	var items []models.Setting
-	db.DB.Order("id DESC").Limit(10).Find(&items)
+	query := db.DB.Order("id DESC").Limit(10)
+
+	if typeName != "" {
+		query.Where("type = ?", typeName)
+	}
+
+	query.Find(&items)
 
 	<- countQueryChannel
 
