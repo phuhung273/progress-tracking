@@ -23,15 +23,8 @@ func Route() {
 	home.Routing(Router)
 }
 func Init() {
-	
-	// engine := html.New("views", ".html")
-	// engine.Reload(true)
 
-	Router = fiber.New(fiber.Config{
-		// Views: engine,
-	})
+	Router = fiber.New(fiber.Config{})
 
 	Router.Use(cors.New())
-
-	// middleware.SessionStore = session.New()
 }

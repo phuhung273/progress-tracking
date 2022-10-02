@@ -13,11 +13,6 @@ import (
 var SessionStore *session.Store
 
 func Auth(c *fiber.Ctx) error {
-	// sess, _ := SessionStore.Get(c)
-	// user := sess.Get("user_id")
-	// if user == nil {
-	// 	return c.Redirect("/auth/login")
-	// }
 
 	authorization := c.Get("Authorization")
 	bearerToken := strings.Split(authorization, " ")[1]
@@ -28,7 +23,6 @@ func Auth(c *fiber.Ctx) error {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 	
-		// hmacSampleSecret is a []byte containing your secret, e.g. []byte("my_secret_key")
 		return []byte(os.Getenv("JWT_SECRET")), nil
 	})
 
@@ -46,10 +40,10 @@ func Auth(c *fiber.Ctx) error {
 
 	
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		c.Locals("user_id", claims["user_id"])
+		c.Locals("user_id", int(claims["user_id"].(float64)))
 	} else {
 		return c.Status(401).JSON(fiber.Map{
-			"message": "Token invalid",
+			"message": "Invalid token",
 		})
 	}
 	

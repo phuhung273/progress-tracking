@@ -11,18 +11,11 @@ import (
 )
 
 func index(c *fiber.Ctx) error {
-	// sess, _ := middleware.SessionStore.Get(c)
-
-	// userId := sess.Get("user_id")
 	userId := c.Locals("user_id").(int)
 
 	var items []models.Exercise
 	db.DB.Where("user_id = ?", userId).Order("id DESC").Joins("Category").Joins("SecondaryCategory").Preload("Results.Criteria").Limit(10).Find(&items)
 
-	// return c.Render("exercise/index.html", fiber.Map{
-	// 	"title": "Exercise",
-	// 	"items": items,
-	// })
 	c.Set("Access-Control-Expose-Headers", "X-Total-Count")
 	c.Set("X-Total-Count", fmt.Sprint(len(items)))
 	return c.JSON(items)
